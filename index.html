@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DARLEND | Магазин игровой валюты</title>
+    <style>
+        :root { --gold: #FFD700; --bg: #050505; --card: #121212; --text: #ffffff; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; }
+        header { padding: 50px 20px; text-align: center; background: #000; border-bottom: 1px solid #222; }
+        .logo { font-size: 3rem; font-weight: 900; letter-spacing: 8px; color: var(--gold); margin: 0; }
+        .container { max-width: 1000px; margin: auto; padding: 20px; }
+        .section-title { margin: 30px 0 15px; font-size: 1.2rem; text-transform: uppercase; color: var(--gold); border-left: 4px solid var(--gold); padding-left: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .card { background: var(--card); border-radius: 20px; padding: 25px; text-align: center; border: 1px solid #222; }
+        .item-price { font-size: 1.8rem; font-weight: 800; color: var(--gold); margin: 15px 0; }
+        .btn { background: var(--gold); color: #000; border: none; width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center; }
+        .modal-content { background: #111; width: 90%; max-width: 380px; padding: 30px; border-radius: 25px; border: 1px solid #333; text-align: center; }
+        input { width: 100%; padding: 15px; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; color: #fff; margin: 15px 0; text-align: center; box-sizing: border-box; }
+        .copy-box { background: #1a1a1a; border: 2px dashed var(--gold); padding: 15px; border-radius: 12px; margin: 15px 0; cursor: pointer; }
+        .btn-pay { background: #27ae60; color: white; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">DARLEND</div>
+</header>
+
+<div class="container">
+    <div class="section-title">PUBG Mobile (UID)</div>
+    <div id="pubg-list" class="grid"></div>
+    <div class="section-title">Brawl Stars (Mail)</div>
+    <div id="brawl-list" class="grid"></div>
+</div>
+
+<div id="shopModal" class="modal">
+    <div class="modal-content">
+        <h2 id="m-title" style="margin:0; color:var(--gold);"></h2>
+        <p id="m-desc" style="opacity:0.7;"></p>
+        <div id="step-1">
+            <input type="text" id="user-input" placeholder="Введите данные">
+            <button class="btn" onclick="nextStep()">Далее</button>
+        </div>
+        <div id="step-2" style="display:none;">
+            <p>Сумма: <b id="m-price" style="color:var(--gold)"></b> ₽</p>
+            <div class="copy-box" onclick="copyCard()">
+                <b>2204 3211 4831 8157</b><br>
+                <small>(нажми для копирования карты)</small>
+            </div>
+            <button class="btn btn-pay" onclick="sendOrder()">✅ Я оплатил(-а)</button>
+        </div>
+        <button onclick="closeModal()" style="background:none; border:none; color:#555; margin-top:20px; cursor:pointer;">Отмена</button>
+    </div>
+</div>
+
+<script>
+    var pubg = [{n: "60 UC", p: 79}, {n: "325 UC", p: 369}, {n: "660 UC", p: 789}, {n: "1800 UC", p: 1949}, {n: "3850 UC", p: 3879}, {n: "8100 UC", p: 7749}];
+    var brawl = [{n: "Brawl Pass", p: 819}, {n: "Brawl Pass Plus", p: 1169}, {n: "30 Гемов", p: 194}, {n: "360 Гемов", p: 1789}];
+    var currentItem = {};
+
+    function init() {
+        var pList = document.getElementById('pubg-list');
+        for (var i = 0; i < pubg.length; i++) {
+            pList.innerHTML += '<div class="card"><div>' + pubg[i].n + '</div><div class="item-price">' + pubg[i].p + ' ₽</div><button class="btn" onclick="openModal(\'' + pubg[i].n + '\', ' + pubg[i].p + ', \'UID\')">Купить</button></div>';
+        }
+        var bList = document.getElementById('brawl-list');
+        for (var j = 0; j < brawl.length; j++) {
+            bList.innerHTML += '<div class="card"><div>' + brawl[j].n + '</div><div class="item-price">' + brawl[j].p + ' ₽</div><button class="btn" onclick="openModal(\'' + brawl[j].n + '\', ' + brawl[j].p + ', \'Почту\')">Купить</button></div>';
+        }
+    }
+
+    function openModal(name, price, type) {
+        currentItem = {name: name, price: price, type: type};
+        document.getElementById('m-title').innerText = name;
+        document.getElementById('m-desc').innerText = "Введите ваш " + type;
+        document.getElementById('m-price').innerText = price;
+        document.getElementById('shopModal').style.display = 'flex';
+        document.getElementById('step-1').style.display = 'block';
+        document.getElementById('step-2').style.display = 'none';
+    }
+
+    function nextStep() {
+        if(document.getElementById('user-input').value.length < 3) return alert('Введите данные!');
+        document.getElementById('step-1').style.display = 'none';
+        document.getElementById('step-2').style.display = 'block';
+    }
+
+    function copyCard() {
+        var temp = document.createElement('textarea');
+        temp.value = '2204321148318157';
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        alert('Карта скопирована!');
+    }
+
+    function closeModal() { document.getElementById('shopModal').style.display = 'none'; }
+
+    function sendOrder() {
+        var userData = document.getElementById('user-input').value;
+        var text = "🚀 ЗАКАЗ DARLEND\nТовар: " + currentItem.name + "\nДанные: " + userData + "\nЦена: " + currentItem.price + " ₽";
+        
+        // Прямая ссылка без сложных символов
+        var finalLink = "https://t.me" + encodeURIComponent(text);
+        
+        window.location.href = finalLink;
+    }
+    
+    init();
+</script>
+</body>
+</html>
