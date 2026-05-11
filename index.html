@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DARLEND | Store</title>
+    <style>
+        :root { --gold: #FFD700; --bg: #0a0a0a; --card: #161616; --text: #fff; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; text-align: center; }
+        header { padding: 40px 20px; background: #000; border-bottom: 2px solid var(--gold); }
+        .logo { font-size: 2.5rem; font-weight: 900; letter-spacing: 5px; color: var(--gold); }
+        .container { max-width: 800px; margin: auto; padding: 20px; }
+        .section-title { margin: 30px 0 15px; color: var(--gold); text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        
+        .card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #333; }
+        .price { font-size: 1.8rem; color: var(--gold); font-weight: bold; margin: 10px 0; }
+        
+        input { width: 100%; padding: 15px; margin: 10px 0; background: #000; border: 1px solid var(--gold); border-radius: 10px; color: #fff; text-align: center; box-sizing: border-box; display: none; }
+        
+        .btn { background: var(--gold); color: #000; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; text-decoration: none; box-sizing: border-box; font-size: 1rem; }
+        .btn-pay { background: #27ae60; color: #fff; display: none; margin-top: 10px; }
+        
+        .card b { display: block; margin: 10px 0; color: #888; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<header><div class="logo">DARLEND</div></header>
+
+<div class="container">
+    <div class="section-title">PUBG Mobile (по UID)</div>
+    <div id="pubg-list"></div>
+
+    <div class="section-title">Brawl Stars (по Почте)</div>
+    <div id="brawl-list"></div>
+</div>
+
+<script>
+    var pData = [{n:"60 UC", p:79}, {n:"325 UC", p:369}, {n:"660 UC", p:789}, {n:"1800 UC", p:1949}, {n:"3850 UC", p:3879}, {n:"8100 UC", p:7749}];
+    var bData = [{n:"Brawl Pass", p:819}, {n:"Brawl Pass Plus", p:1169}, {n:"30 Гемов", p:194}, {n:"360 Гемов", p:1789}];
+
+    function createList(data, targetId, type) {
+        var container = document.getElementById(targetId);
+        data.forEach(function(item, index) {
+            var id = targetId + index;
+            var html = '<div class="card">' +
+                '<h3>' + item.n + '</h3>' +
+                '<div class="price">' + item.p + ' ₽</div>' +
+                '<button class="btn" id="btn-buy-'+id+'" onclick="showInput(\''+id+'\')">Купить</button>' +
+                '<input type="text" id="input-'+id+'" placeholder="Введите ваш '+type+'" oninput="updateLink(\''+id+'\', \''+item.n+'\', '+item.p+')">' +
+                '<div id="pay-info-'+id+'" style="display:none;">' +
+                    '<b>Оплата на карту Ozon: 2204 3211 4831 8157</b>' +
+                    '<a href="#" id="link-'+id+'" class="btn btn-pay">✅ Я оплатил(-а)</a>' +
+                '</div>' +
+            '</div>';
+            container.innerHTML += html;
+        });
+    }
+
+    function showInput(id) {
+        document.getElementById('input-'+id).style.display = 'block';
+        document.getElementById('btn-buy-'+id).style.display = 'none';
+    }
+
+    function updateLink(id, name, price) {
+        var val = document.getElementById('input-'+id).value;
+        var payInfo = document.getElementById('pay-info-'+id);
+        var link = document.getElementById('link-'+id);
+        
+        if(val.length > 4) {
+            payInfo.style.display = 'block';
+            var text = "🚀 ЗАКАЗ DARLEND\nТовар: " + name + "\nДанные: " + val + "\nЦена: " + price + " ₽\nОплачено на Ozon.";
+            link.href = "https://t.me" + encodeURIComponent(text);
+        } else {
+            payInfo.style.display = 'none';
+        }
+    }
+
+    createList(pData, 'pubg-list', 'UID');
+    createList(bData, 'brawl-list', 'Supercell ID');
+</script>
+
+</body>
+</html>
