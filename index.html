@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DARLEND | Магазин доната</title>
+    <style>
+        :root { --gold: #FFD700; --bg: #050505; --card: #111; --text: #fff; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+        
+        header { 
+            padding: 50px 20px; text-align: center; 
+            background: linear-gradient(rgba(0,0,0,0.6), var(--bg)), url('https://unsplash.com'); 
+            background-size: cover; border-bottom: 1px solid #1a1a1a; 
+        }
+        .logo { font-size: 3.2rem; font-weight: 900; letter-spacing: 8px; color: var(--gold); margin: 0; text-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+        .tagline { opacity: 0.5; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px; }
+
+        .container { max-width: 1000px; margin: auto; padding: 20px; }
+        .section-title { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 2px; margin: 40px 0 20px; display: flex; align-items: center; }
+        .section-title::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--gold), transparent); margin-left: 15px; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; }
+        .card { background: var(--card); border-radius: 20px; padding: 25px; text-align: center; border: 1px solid #222; transition: 0.3s; }
+        .card:hover { border-color: var(--gold); transform: translateY(-3px); }
+        .item-name { font-size: 1.3rem; font-weight: 700; }
+        .item-price { font-size: 1.8rem; font-weight: 800; color: var(--gold); margin: 15px 0; }
+        
+        .btn { background: var(--gold); color: #000; border: none; width: 100%; padding: 14px; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 1rem; }
+        
+        /* Окно */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.97); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
+        .modal-content { background: #111; width: 85%; max-width: 380px; padding: 30px; border-radius: 25px; border: 1px solid #333; text-align: center; }
+        input { width: 100%; padding: 15px; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; color: #fff; margin: 15px 0; text-align: center; box-sizing: border-box; font-size: 1rem; }
+        
+        .copy-box { background: #1a1a1a; border: 2px dashed var(--gold); padding: 15px; border-radius: 12px; margin: 15px 0; cursor: pointer; }
+        .btn-pay { background: #27ae60; color: white; margin-top: 10px; }
+        
+        .footer { padding: 40px; text-align: center; opacity: 0.4; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">DARLEND</div>
+    <div class="tagline">Digital currency shop</div>
+</header>
+
+<div class="container">
+    <div class="section-title">PUBG Mobile (UID)</div>
+    <div id="pubg-grid" class="grid"></div>
+
+    <div class="section-title">Brawl Stars (Mail)</div>
+    <div id="brawl-grid" class="grid"></div>
+</div>
+
+<div class="footer">
+    &copy; 2024 DARLEND. По всем вопросам: @BoostHubX1
+</div>
+
+<div id="shopModal" class="modal">
+    <div class="modal-content">
+        <h2 id="m-title" style="margin:0; color:var(--gold);"></h2>
+        <p id="m-desc" style="opacity:0.6; font-size:0.9rem;"></p>
+        
+        <div id="step-1">
+            <input type="text" id="user-input" placeholder="Введите данные">
+            <button class="btn" onclick="goNext()">Далее</button>
+        </div>
+
+        <div id="step-2" style="display:none;">
+            <p>Сумма: <b id="m-price" style="color:var(--gold)"></b> ₽</p>
+            <div class="copy-box" onclick="copyCard()">
+                <b id="card-num">2204 3211 4831 8157</b><br>
+                <small>нажми, чтобы скопировать</small>
+            </div>
+            <p style="font-size:0.7rem; color:#888;">После оплаты нажми кнопку ниже. Тебя перекинет в Telegram для подтверждения.</p>
+            <button class="btn btn-pay" onclick="sendOrder()">✅ Я оплатил(-а)</button>
+        </div>
+        <button onclick="closeModal()" style="background:none; border:none; color:#555; margin-top:15px; cursor:pointer;">Отмена</button>
+    </div>
+</div>
+
+<script>
+    const pubg = [{n:"60 UC", p:79}, {n:"325 UC", p:369}, {n:"660 UC", p:789}, {n:"1800 UC", p:1949}, {n:"3850 UC", p:3879}, {n:"8100 UC", p:7749}];
+    const brawl = [{n:"Brawl Pass", p:819}, {n:"Brawl Pass Plus", p:1169}, {n:"30 Гемов", p:194}, {n:"360 Гемов", p:1789}];
+
+    let current = {};
+
+    function init() {
+        pubg.forEach(i => { document.getElementById('pubg-grid').innerHTML += `<div class="card"><div class="item-name">${i.n}</div><div class="item-price">${i.p} ₽</div><button class="btn" onclick="openM('${i.n}', ${i.p}, 'UID')">Купить</button></div>`; });
+        brawl.forEach(i => { document.getElementById('brawl-grid').innerHTML += `<div class="card"><div class="item-name">${i.n}</div><div class="item-price">${i.p} ₽</div><button class="btn" onclick="openM('${i.n}', ${i.p}, 'Почту')">Купить</button></div>`; });
+    }
+
+    function openM(n, p, t) {
+        current = {n, p, t};
+        document.getElementById('m-title').innerText = n;
+        document.getElementById('m-desc').innerText = "Введите ваш " + t;
+        document.getElementById('m-price').innerText = p;
+        document.getElementById('shopModal').style.display = 'flex';
+        document.getElementById('step-1').style.display = 'block';
+        document.getElementById('step-2').style.display = 'none';
+        document.getElementById('user-input').value = "";
+    }
+
+    function goNext() {
+        if(document.getElementById('user-input').value.length < 3) return alert('Ошибка ввода!');
+        document.getElementById('step-1').style.display = 'none';
+        document.getElementById('step-2').style.display = 'block';
+    }
+
+    function copyCard() {
+        const el = document.createElement('textarea');
+        el.value = '2204321148318157';
+        document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+        alert('Карта скопирована!');
+    }
+
+    function closeModal() { document.getElementById('shopModal').style.display = 'none'; }
+
+    function sendOrder() {
+        const val = document.getElementById('user-input').value;
+        const msg = `🚀 ЗАКАЗ DARLEND\n🛒 Товар: ${current.n}\n🔑 Данные: ${val}\n💰 Цена: ${current.p} ₽\nОплачено на Ozon.`;
+        const encoded = encodeURIComponent(msg);
+        
+        // Магия перенаправления:
+        const tMeUrl = `https://t.me{encoded}`;
+        const tgUrl = `tg://msg?text=${encoded}&to=@BoostHubX1`;
+
+        // 1. Пробуем открыть напрямую через протокол приложения
+        window.location.href = tgUrl;
+
+        // 2. Если через секунду не ушли с сайта - открываем запасной вариант
+        setTimeout(() => {
+            window.location.href = tMeUrl;
+        }, 1000);
+    }
+
+    init();
+</script>
+</body>
+</html>
