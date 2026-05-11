@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARLEND | Магазин игровой валюты</title>
+    <style>
+        :root {
+            --primary: #FFD700; /* Золото */
+            --accent: #ff4757; 
+            --bg: #0a0a0a;
+            --card-bg: #141414;
+            --text: #ffffff;
+        }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; line-height: 1.6; }
+        
+        /* Шапка */
+        header { 
+            padding: 60px 20px; 
+            background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, var(--bg) 100%), 
+                        url('https://freepik.com'); 
+            background-size: cover;
+            border-bottom: 1px solid #222;
+        }
+        .logo { font-size: 3.5em; font-weight: 900; letter-spacing: 5px; color: var(--primary); margin: 0; text-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
+        .tagline { opacity: 0.7; font-size: 1.1em; margin-top: 10px; }
+
+        .container { max-width: 1100px; margin: auto; padding: 40px 20px; }
+        
+        /* Сетка товаров */
+        .category-header { display: flex; align-items: center; margin: 40px 0 25px; }
+        .category-header h2 { font-size: 1.8em; margin: 0; padding-right: 20px; }
+        .line { flex-grow: 1; height: 1px; background: #333; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 25px; }
+        .card { 
+            background: var(--card-bg); 
+            padding: 30px 20px; 
+            border-radius: 20px; 
+            border: 1px solid #222; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        .card:hover { transform: translateY(-10px); border-color: var(--primary); box-shadow: 0 10px 30px rgba(255, 215, 0, 0.1); }
+        .card h3 { margin: 0; font-size: 1.4em; }
+        .price { font-size: 1.8em; font-weight: 800; color: var(--primary); margin: 15px 0; }
+        
+        button { 
+            background: var(--primary); border: none; padding: 12px; border-radius: 12px; 
+            cursor: pointer; font-weight: bold; color: #000; width: 100%; font-size: 1em;
+            transition: 0.3s;
+        }
+        button:hover { filter: brightness(1.2); transform: scale(1.02); }
+
+        /* Модалка */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-content { background: #1a1a1a; padding: 40px; border-radius: 30px; max-width: 450px; width: 90%; text-align: center; border: 1px solid #333; }
+        input { width: 100%; padding: 15px; margin: 20px 0; border-radius: 12px; border: 1px solid #444; background: #252525; color: white; font-size: 1em; text-align: center; }
+        
+        .copy-box { 
+            background: #252525; padding: 20px; border-radius: 15px; cursor: pointer; 
+            border: 2px dashed var(--primary); margin: 20px 0; transition: 0.2s;
+        }
+        .copy-box:hover { background: #333; }
+        .copy-box b { font-size: 1.2em; letter-spacing: 1px; color: var(--primary); }
+
+        .tg-link { display: inline-block; margin-top: 30px; color: #3498db; text-decoration: none; font-size: 0.9em; border: 1px solid #3498db; padding: 8px 20px; border-radius: 20px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">DARLEND</div>
+    <div class="tagline">Ваш проводник в мир доната PUBG & Brawl Stars</div>
+</header>
+
+<div class="container">
+    <div class="category-header">
+        <h2>PUBG MOBILE</h2>
+        <div class="line"></div>
+    </div>
+    <div class="grid" id="pubg-grid"></div>
+
+    <div class="category-header">
+        <h2>BRAWL STARS</h2>
+        <div class="line"></div>
+    </div>
+    <div class="grid" id="brawl-grid"></div>
+    
+    <div style="margin-top: 60px;">
+        <a href="https://t.me" class="tg-link">💬 Читать отзывы в Telegram</a>
+    </div>
+</div>
+
+<div id="buyModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle" style="color: var(--primary);"></h2>
+        <p id="modalDesc"></p>
+        
+        <div id="step1">
+            <input type="text" id="userData" placeholder="Введите данные">
+            <button onclick="showPayment()">Продолжить</button>
+        </div>
+
+        <div id="step2" style="display:none;">
+            <p>К оплате: <span id="finalPrice" style="color:var(--primary); font-weight:bold; font-size: 1.4em;"></span> ₽</p>
+            <p>Переведите сумму на карту <b>Ozon Банк</b>:</p>
+            <div class="copy-box" onclick="copyCard()">
+                <b id="cardNumber">2204 3211 4831 8157</b><br>
+                <small style="opacity: 0.5;">(нажмите, чтобы скопировать)</small>
+            </div>
+            <p style="font-size: 0.85em; color: #888;">После перевода нажмите «Я оплатил» — вас перекинет в Telegram для подтверждения.</p>
+            <button style="background: #27ae60; color: white;" onclick="sendOrder()">✅ Я оплатил(-а)</button>
+        </div>
+        
+        <button onclick="closeModal()" style="background:none; color:#555; margin-top:20px; font-size: 0.9em;">Отмена</button>
+    </div>
+</div>
+
+<script>
+    const pubgItems = [
+        {name: "60 UC", price: 79}, {name: "325 UC", price: 369}, {name: "660 UC", price: 789},
+        {name: "1800 UC", price: 1949}, {name: "3850 UC", price: 3879}, {name: "8100 UC", price: 7749}
+    ];
+    const brawlItems = [
+        {name: "Brawl Pass", price: 819}, {name: "Brawl Pass Plus", price: 1169},
+        {name: "30 Гемов", price: 194}, {name: "360 Гемов", price: 1789}
+    ];
+
+    let currentItem = {};
+
+    function render() {
+        const pGrid = document.getElementById('pubg-grid');
+        pubgItems.forEach(item => {
+            pGrid.innerHTML += `<div class="card"><h3>${item.name}</h3><div class="price">${item.price}₽</div><button onclick="openModal('${item.name}', ${item.price}, 'UID')">Купить</button></div>`;
+        });
+
+        const bGrid = document.getElementById('brawl-grid');
+        brawlItems.forEach(item => {
+            bGrid.innerHTML += `<div class="card"><h3>${item.name}</h3><div class="price">${item.price}₽</div><button onclick="openModal('${item.name}', ${item.price}, 'Почту (Supercell ID)')">Купить</button></div>`;
+        });
+    }
+
+    function openModal(name, price, type) {
+        currentItem = {name, price, type};
+        document.getElementById('modalTitle').innerText = name;
+        document.getElementById('modalDesc').innerText = "Введите ваш " + type;
+        document.getElementById('userData').placeholder = type;
+        document.getElementById('finalPrice').innerText = price;
+        document.getElementById('buyModal').style.display = 'flex';
+        document.getElementById('step1').style.display = 'block';
+        document.getElementById('step2').style.display = 'none';
+        document.getElementById('userData').value = "";
+    }
+
+    function showPayment() {
+        if(document.getElementById('userData').value.length < 3) return alert('Пожалуйста, введите корректные данные!');
+        document.getElementById('step1').style.display = 'none';
+        document.getElementById('step2').style.display = 'block';
+    }
+
+    function copyCard() {
+        navigator.clipboard.writeText("2204321148318157");
+        alert("Номер карты скопирован!");
+    }
+
+    function closeModal() { document.getElementById('buyModal').style.display = 'none'; }
+
+    function sendOrder() {
+        const data = document.getElementById('userData').value;
+        const text = `🚀 НОВЫЙ ЗАКАЗ В DARLEND\n--------------------------\n🛒 Товар: ${currentItem.name}\n🔑 Данные: ${data}\n💰 Сумма: ${currentItem.price} ₽\n--------------------------\nКлиент сообщил об оплате на Ozon!`;
+        window.open(`https://t.me?text=${encodeURIComponent(text)}`, '_blank');
+        closeModal();
+    }
+
+    render();
+</script>
+</body>
+</html>
